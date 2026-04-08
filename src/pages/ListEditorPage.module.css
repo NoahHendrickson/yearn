@@ -1,0 +1,53 @@
+.headerActions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.count {
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--hover-bg);
+  border-radius: 20px;
+  padding: 0.1rem 0.5rem;
+  color: var(--fg-muted);
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.draggable {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  border-radius: 10px;
+  transition: opacity 0.15s;
+}
+
+.draggable > :last-child { flex: 1; }
+
+.dragOver { opacity: 0.5; }
+
+.handle {
+  cursor: grab;
+  color: var(--fg-muted);
+  font-size: 1.1rem;
+  padding: 0.9rem 0.2rem 0;
+  user-select: none;
+}

@@ -1,0 +1,12 @@
+.card {
+  display: block;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.2rem;
+  text-decoration: none;
+  color: var(--fg);
+  transition: border-color 0.15s, transform 0.1s;
+}
+.card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.title { font-size: 1rem; font-weight: 700; margin: 0; }
