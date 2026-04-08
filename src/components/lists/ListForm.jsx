@@ -8,6 +8,7 @@ export function ListForm({ initial = {}, onSubmit, onCancel, submitLabel = 'Save
   const [title, setTitle] = useState(initial.title || '')
   const [description, setDescription] = useState(initial.description || '')
   const [isPublic, setIsPublic] = useState(initial.is_public ?? false)
+  const [dueDate, setDueDate] = useState(initial.due_date || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -16,7 +17,7 @@ export function ListForm({ initial = {}, onSubmit, onCancel, submitLabel = 'Save
     setError('')
     setLoading(true)
     try {
-      await onSubmit({ title, description, is_public: isPublic })
+      await onSubmit({ title, description, is_public: isPublic, due_date: dueDate || null })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -40,6 +41,13 @@ export function ListForm({ initial = {}, onSubmit, onCancel, submitLabel = 'Save
         value={description}
         onChange={e => setDescription(e.target.value)}
         placeholder="A brief description"
+      />
+      <Input
+        id="list-due-date"
+        label="Due date (optional)"
+        type="date"
+        value={dueDate}
+        onChange={e => setDueDate(e.target.value)}
       />
       <label className={styles.checkLabel}>
         <input

@@ -37,6 +37,8 @@ export const useAuthStore = create((set, get) => ({
   signIn: async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
+    const profile = await get()._fetchProfile(data.session.user.id)
+    set({ session: data.session, profile })
     return data
   },
 
@@ -47,6 +49,10 @@ export const useAuthStore = create((set, get) => ({
       options: { data: { username, display_name: username } },
     })
     if (error) throw error
+    if (data.session) {
+      const profile = await get()._fetchProfile(data.session.user.id)
+      set({ session: data.session, profile })
+    }
     return data
   },
 

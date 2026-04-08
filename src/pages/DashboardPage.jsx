@@ -10,10 +10,12 @@ import { ListForm } from '../components/lists/ListForm'
 import { ListGroupCard } from '../components/groups/ListGroupCard'
 import { ListGroupForm } from '../components/groups/ListGroupForm'
 import { PeopleGroupCard } from '../components/people/PeopleGroupCard'
+import { ShareModal } from '../components/sharing/ShareModal'
 import { Button } from '../components/ui/Button'
 import { Modal } from '../components/ui/Modal'
 import { Spinner } from '../components/ui/Spinner'
 import { EmptyState } from '../components/ui/EmptyState'
+import { cx } from '../utils/cx'
 import styles from './DashboardPage.module.css'
 
 const TABS = ['My Lists', 'Shared with Me', 'List Groups', 'People Groups']
@@ -25,8 +27,9 @@ export function DashboardPage() {
   const [showNewList, setShowNewList] = useState(false)
   const [showNewGroup, setShowNewGroup] = useState(false)
   const [showNewPeopleGroup, setShowNewPeopleGroup] = useState(false)
+  const [shareListId, setShareListId] = useState(null)
 
-  const { myLists, sharedLists, fetchMyLists, fetchSharedLists, createList } = useListStore()
+  const { myLists, sharedLists, fetchMyLists, fetchSharedLists, createList, deleteList } = useListStore()
   const { myGroups, fetchMyGroups, createGroup } = useGroupStore()
   const { myPeopleGroups, fetchMyPeopleGroups, createPeopleGroup } = usePeopleGroupStore()
 
@@ -57,12 +60,16 @@ export function DashboardPage() {
     navigate(`/people-groups/${group.id}`)
   }
 
+  const shareList = shareListId
+    ? (myLists.find(l => l.id === shareListId) || sharedLists.find(l => l.id === shareListId))
+    : null
+
   if (loading) return <Spinner />
 
   return (
     <div>
       <PageHeader
-        title="Dashboard"
+        title="Lists"
         action={
           tab === 'My Lists' ? <Button onClick={() => setShowNewList(true)}>+ New List</Button>
           : tab === 'List Groups' ? <Button onClick={() => setShowNewGroup(true)}>+ New Group</Button>
@@ -75,7 +82,7 @@ export function DashboardPage() {
         {TABS.map(t => (
           <button
             key={t}
-            className={`${styles.tab} ${tab === t ? styles.active : ''}`}
+            className={cx(styles.tab, tab === t && styles.active)}
             onClick={() => setTab(t)}
           >
             {t}
@@ -87,13 +94,21 @@ export function DashboardPage() {
         {tab === 'My Lists' && (
           myLists.length === 0
             ? <EmptyState title="No lists yet" description="Create your first wishlist to get started." action={<Button onClick={() => setShowNewList(true)}>Create a list</Button>} />
-            : <ListGrid lists={myLists} />
+            : <ListGrid
+                lists={myLists}
+                isOwner
+                onDelete={(id) => deleteList(id)}
+                onShare={(id) => setShareListId(id)}
+              />
         )}
 
         {tab === 'Shared with Me' && (
           sharedLists.length === 0
             ? <EmptyState title="Nothing shared with you yet" description="When someone shares a list with you, it'll appear here." />
-            : <ListGrid lists={sharedLists} showOwner />
+            : <ListGrid
+                lists={sharedLists}
+                onShare={(id) => setShareListId(id)}
+              />
         )}
 
         {tab === 'List Groups' && (
@@ -141,6 +156,10 @@ export function DashboardPage() {
             <p style={{ fontSize: '0.82rem', color: 'var(--fg-muted)', margin: 0 }}>Press Enter to create</p>
           </div>
         </Modal>
+      )}
+
+      {shareList && (
+        <ShareModal list={shareList} onClose={() => setShareListId(null)} />
       )}
     </div>
   )

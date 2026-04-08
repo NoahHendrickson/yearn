@@ -13,7 +13,7 @@ export const useListStore = create((set, get) => ({
     set({ loading: true })
     const { data, error } = await supabase
       .from('lists')
-      .select('*')
+      .select('*, profiles(username, display_name), list_items(id, name, position)')
       .order('created_at', { ascending: false })
     if (error) throw error
     set({ myLists: data, loading: false })
@@ -23,17 +23,18 @@ export const useListStore = create((set, get) => ({
     // Lists shared with me (not owned by me)
     const { data, error } = await supabase
       .from('list_shares')
-      .select('list_id, lists(*)')
+      .select('list_id, lists(*, profiles(username, display_name), list_items(id, name, position))')
       .order('created_at', { ascending: false })
     if (error) throw error
     set({ sharedLists: data.map(r => r.lists).filter(Boolean) })
   },
 
-  createList: async ({ title, description, is_public }) => {
+  createList: async ({ title, description, is_public, due_date }) => {
+    const { data: { user } } = await supabase.auth.getUser()
     const { data, error } = await supabase
       .from('lists')
-      .insert({ title, description, is_public })
-      .select()
+      .insert({ title, description, is_public, due_date: due_date || null, owner_id: user.id })
+      .select('*, profiles(username, display_name), list_items(id, name, position)')
       .single()
     if (error) throw error
     set(state => ({ myLists: [data, ...state.myLists] }))

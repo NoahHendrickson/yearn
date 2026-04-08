@@ -1,68 +1,25 @@
-:root {
-  /* Existing accent */
-  --accent: #aa3bff;
-  --accent-hover: #9222f0;
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+@import "./styles/theme.css";
 
-  /* Semantic tokens */
-  --fg: #08060d;
-  --fg-muted: #6b6375;
-  --bg: #fff;
-  --card-bg: #f9f8fc;
-  --input-bg: #fff;
-  --hover-bg: #f4f3f8;
-  --border: #e5e4e7;
-  --danger: #e53e3e;
-  --success: #22863a;
+@plugin "tailwindcss-animate";
+@plugin "tailwindcss-react-aria-components";
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+@custom-variant dark (&:where(.dark-mode, .dark-mode *));
 
-  font: 16px/1.5 var(--sans);
-  color: var(--fg);
-  background: var(--bg);
-  color-scheme: light dark;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@utility scrollbar-hide {
+    &::-webkit-scrollbar {
+        display: none;
+        -webkit-appearance: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --accent: #c084fc;
-    --accent-hover: #a855f7;
-
-    --fg: #f3f4f6;
-    --fg-muted: #9ca3af;
-    --bg: #16171d;
-    --card-bg: #1f2028;
-    --input-bg: #16171d;
-    --hover-bg: #2a2b35;
-    --border: #2e303a;
-    --danger: #fc8181;
-    --success: #68d391;
-  }
+html,
+body {
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
-
-* { box-sizing: border-box; }
-
-body { margin: 0; }
-
-#root {
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-}
-
-h1, h2, h3 {
-  color: var(--fg);
-  margin: 0;
-}
-
-p { margin: 0; }
-
-a { color: var(--accent); }
-
-button { font-family: var(--sans); }
-
-input, textarea, select { font-family: var(--sans); }

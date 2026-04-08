@@ -1,12 +1,17 @@
 import PropTypes from 'prop-types'
 import { ListCard } from './ListCard'
-import styles from './ListGrid.module.css'
 
-export function ListGrid({ lists, showOwner }) {
+export function ListGrid({ lists, isOwner = false, onDelete, onShare }) {
   return (
-    <div className={styles.grid}>
+    <div className="flex flex-wrap gap-4">
       {lists.map(list => (
-        <ListCard key={list.id} list={list} showOwner={showOwner} />
+        <ListCard
+          key={list.id}
+          list={list}
+          isOwner={isOwner}
+          onDelete={onDelete}
+          onShare={onShare}
+        />
       ))}
     </div>
   )
@@ -14,5 +19,7 @@ export function ListGrid({ lists, showOwner }) {
 
 ListGrid.propTypes = {
   lists: PropTypes.array.isRequired,
-  showOwner: PropTypes.bool,
+  isOwner: PropTypes.bool,
+  onDelete: PropTypes.func,
+  onShare: PropTypes.func,
 }
