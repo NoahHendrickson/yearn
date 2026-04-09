@@ -4,9 +4,9 @@ import { useItemStore } from '../stores/itemStore'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Modal } from '../components/ui/Modal'
+import { Select } from '../components/ui/Select'
 import { Spinner } from '../components/ui/Spinner'
 import { cx } from '../utils/cx'
-import { scrapeUrl } from '../utils/scrapeUrl'
 import { Plus, Trash01, Edit02, Link01, Share03 } from '@untitledui/icons'
 
 // ── Add card ─────────────────────────────────────────────────────────────────
@@ -16,7 +16,7 @@ function AddItemCard({ onClick }) {
     <button
       onClick={onClick}
       className={cx(
-        'relative flex items-center justify-center w-[300px] h-[414px]',
+        'relative flex items-center justify-center flex-1 basis-[300px] min-w-[260px] h-[414px]',
         'rounded-[32px] border border-white/[0.12] shadow-xs overflow-hidden',
         'group transition-opacity hover:opacity-90',
       )}
@@ -55,7 +55,7 @@ function YearnItemCard({ item, onDelete, onEdit }) {
 
   return (
     <div className={cx(
-      'relative flex flex-col gap-4 p-6 w-[300px]',
+      'relative flex flex-col gap-4 p-6 flex-1 basis-[300px] min-w-[260px]',
       'rounded-[32px] border border-white/[0.12] shadow-xs overflow-hidden',
     )}>
       <div className="absolute inset-0 bg-white/30 pointer-events-none rounded-[32px]" />
@@ -120,33 +120,9 @@ function YearnItemCard({ item, onDelete, onEdit }) {
 function AddItemModal({ onClose, onSave }) {
   const [url, setUrl] = useState('')
   const [name, setName] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [size, setSize] = useState('')
-  const [color, setColor] = useState('')
   const [yearnStatus, setYearnStatus] = useState('Yearning bad')
   const [loading, setLoading] = useState(false)
-  const [scraping, setScraping] = useState(false)
   const [error, setError] = useState('')
-
-  const handleUrlPaste = async (e) => {
-    const pasted = e.clipboardData?.getData('text') || ''
-    if (!pasted) return
-    let parsed
-    try { parsed = new URL(pasted) } catch { return }
-    if (!parsed.protocol.startsWith('http')) return
-    setScraping(true)
-    try {
-      const meta = await scrapeUrl(pasted)
-      if (meta.name) setName(prev => prev || meta.name)
-      if (meta.imageUrl) setImageUrl(prev => prev || meta.imageUrl)
-      if (meta.size) setSize(prev => prev || meta.size)
-      if (meta.color) setColor(prev => prev || meta.color)
-    } catch (err) {
-      setError('Could not fetch link details — fill in manually.')
-    } finally {
-      setScraping(false)
-    }
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -154,7 +130,7 @@ function AddItemModal({ onClose, onSave }) {
     setError('')
     setLoading(true)
     try {
-      await onSave({ url, name, image_url: imageUrl, size, color, yearning_status: yearnStatus })
+      await onSave({ url: url || null, name, yearning_status: yearnStatus })
       onClose()
     } catch (err) {
       setError(err.message)
@@ -172,9 +148,7 @@ function AddItemModal({ onClose, onSave }) {
           type="url"
           value={url}
           onChange={e => setUrl(e.target.value)}
-          onPaste={handleUrlPaste}
           placeholder="Paste the URL here"
-          hint={scraping ? 'Fetching details…' : 'Paste a link and we\'ll fill the rest'}
           leadingIcon={<Link01 size={16} />}
           size="sm"
         />
@@ -187,51 +161,17 @@ function AddItemModal({ onClose, onSave }) {
           placeholder="What is it?"
           size="sm"
         />
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="item-status" className="text-sm font-medium text-text-secondary">
-            How bad are you yearning?
-          </label>
-          <select
-            id="item-status"
-            value={yearnStatus}
-            onChange={e => setYearnStatus(e.target.value)}
-            className="h-9 px-3 rounded-md border border-border-primary bg-bg-primary text-sm text-text-primary shadow-xs outline-none focus:border-2 focus:border-border-brand"
-          >
-            <option value="Yearning bad">Yearning bad</option>
-            <option value="Yearning a little">Yearning a little</option>
-          </select>
-        </div>
-        <Input
-          id="item-image"
-          label="Image URL"
-          type="url"
-          value={imageUrl}
-          onChange={e => setImageUrl(e.target.value)}
-          placeholder="Paste an image URL (optional)"
+        <Select
+          id="item-status"
+          label="How bad are you yearning?"
           size="sm"
+          value={yearnStatus}
+          onChange={e => setYearnStatus(e.target.value)}
+          options={[
+            { value: 'Yearning bad', label: 'Yearning bad' },
+            { value: 'Yearning a little', label: 'Yearning a little' },
+          ]}
         />
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <Input
-              id="item-size"
-              label="Size"
-              value={size}
-              onChange={e => setSize(e.target.value)}
-              placeholder="e.g. Medium"
-              size="sm"
-            />
-          </div>
-          <div className="flex-1">
-            <Input
-              id="item-color"
-              label="Color"
-              value={color}
-              onChange={e => setColor(e.target.value)}
-              placeholder="e.g. Heather gray"
-              size="sm"
-            />
-          </div>
-        </div>
         {error && <p className="text-sm text-fg-error-primary">{error}</p>}
         <div className="flex gap-3 pt-2">
           <Button type="button" variant="secondary" size="sm" onClick={onClose}>Cancel</Button>
@@ -247,9 +187,6 @@ function AddItemModal({ onClose, onSave }) {
 function EditItemModal({ item, onClose, onSave }) {
   const [url, setUrl] = useState(item.url || '')
   const [name, setName] = useState(item.name || '')
-  const [imageUrl, setImageUrl] = useState(item.image_url || '')
-  const [size, setSize] = useState(item.size || '')
-  const [color, setColor] = useState(item.color || '')
   const [yearnStatus, setYearnStatus] = useState(item.yearning_status || 'Yearning bad')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -260,7 +197,7 @@ function EditItemModal({ item, onClose, onSave }) {
     setError('')
     setLoading(true)
     try {
-      await onSave(item.id, { url, name, image_url: imageUrl, size, color, yearning_status: yearnStatus })
+      await onSave(item.id, { url: url || null, name, yearning_status: yearnStatus })
       onClose()
     } catch (err) {
       setError(err?.message || 'Something went wrong.')
@@ -274,18 +211,17 @@ function EditItemModal({ item, onClose, onSave }) {
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <Input id="edit-url" label="Link" type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="Paste the URL here" leadingIcon={<Link01 size={16} />} size="sm" />
         <Input id="edit-name" label="Item name" required value={name} onChange={e => setName(e.target.value)} placeholder="What is it?" size="sm" />
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="edit-status" className="text-sm font-medium text-text-secondary">How bad are you yearning?</label>
-          <select id="edit-status" value={yearnStatus} onChange={e => setYearnStatus(e.target.value)} className="h-9 px-3 rounded-md border border-border-primary bg-bg-primary text-sm text-text-primary shadow-xs outline-none focus:border-2 focus:border-border-brand">
-            <option value="Yearning bad">Yearning bad</option>
-            <option value="Yearning a little">Yearning a little</option>
-          </select>
-        </div>
-        <Input id="edit-image" label="Image URL" type="url" value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="Paste an image URL (optional)" size="sm" />
-        <div className="flex gap-4">
-          <div className="flex-1"><Input id="edit-size" label="Size" value={size} onChange={e => setSize(e.target.value)} placeholder="e.g. Medium" size="sm" /></div>
-          <div className="flex-1"><Input id="edit-color" label="Color" value={color} onChange={e => setColor(e.target.value)} placeholder="e.g. Heather gray" size="sm" /></div>
-        </div>
+        <Select
+          id="edit-status"
+          label="How bad are you yearning?"
+          size="sm"
+          value={yearnStatus}
+          onChange={e => setYearnStatus(e.target.value)}
+          options={[
+            { value: 'Yearning bad', label: 'Yearning bad' },
+            { value: 'Yearning a little', label: 'Yearning a little' },
+          ]}
+        />
         {error && <p className="text-sm text-fg-error-primary">{error}</p>}
         <div className="flex gap-3 pt-2">
           <Button type="button" variant="secondary" size="sm" onClick={onClose}>Cancel</Button>

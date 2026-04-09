@@ -1,4 +1,0 @@
-.manageSection { margin-top: 2rem; }
-.manageTitle { font-weight: 700; font-size: 0.9rem; margin: 0 0 0.75rem; color: var(--fg-muted); }
-.manageList { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
-.manageItem { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.75rem; background: var(--hover-bg); border-radius: 8px; font-size: 0.88rem; }

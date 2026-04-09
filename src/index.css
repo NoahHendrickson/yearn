@@ -3,6 +3,8 @@
 @import "@fontsource-variable/geist-mono";
 @import "./styles/theme.css";
 
+@source "../node_modules/@noahhendrickson/yearn-ui/dist";
+
 @plugin "tailwindcss-animate";
 @plugin "tailwindcss-react-aria-components";
 

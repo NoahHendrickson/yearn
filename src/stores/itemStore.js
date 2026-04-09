@@ -45,8 +45,22 @@ export const useItemStore = create((set, get) => ({
   },
 
   deleteItem: async (id) => {
-    const { error } = await supabase.from('items').delete().eq('id', id)
-    if (error) throw error
     set(state => ({ items: state.items.filter(i => i.id !== id) }))
+    const { error } = await supabase.from('items').delete().eq('id', id)
+    if (error) {
+      await get().fetchItems()
+      throw error
+    }
+  },
+
+  uploadItemImage: async (file) => {
+    const user = useAuthStore.getState().session?.user
+    if (!user) throw new Error('Not authenticated')
+    const ext = file.name?.split('.').pop() || 'png'
+    const path = `${user.id}/${Date.now()}.${ext}`
+    const { error } = await supabase.storage.from('item-images').upload(path, file)
+    if (error) throw error
+    const { data } = supabase.storage.from('item-images').getPublicUrl(path)
+    return data.publicUrl
   },
 }))
