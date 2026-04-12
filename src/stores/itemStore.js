@@ -12,7 +12,6 @@ export const useItemStore = create((set, get) => ({
       const { data, error } = await supabase
         .from('items')
         .select('*')
-        .order('position', { ascending: true })
         .order('created_at', { ascending: false })
       if (error) throw error
       set({ items: data, loading: false })
@@ -26,12 +25,40 @@ export const useItemStore = create((set, get) => ({
     const user = useAuthStore.getState().session?.user
     if (!user) throw new Error('Not authenticated')
     const position = get().items.length
-    const { data, error } = await supabase
-      .from('items')
-      .insert({ owner_id: user.id, name, description, url, image_url, size, color, position, yearning_status })
-      .select()
-    if (error) throw error
-    if (data?.length) set(state => ({ items: [...state.items, ...data] }))
+    const tempId = `opt-${Date.now()}`
+
+    // Optimistic insert — show the item immediately so the modal can close
+    set(state => ({
+      items: [{
+        id: tempId,
+        owner_id: user.id,
+        name,
+        description: description ?? null,
+        url: url ?? null,
+        image_url: image_url ?? null,
+        size: size ?? null,
+        color: color ?? null,
+        position,
+        yearning_status,
+      }, ...state.items],
+    }))
+
+    // Persist in background; roll back the optimistic item on failure
+    ;(async () => {
+      try {
+        const { error } = await supabase
+          .from('items')
+          .insert({ owner_id: user.id, name, description, url, image_url, size, color, position, yearning_status })
+        if (error) throw error
+        const { data } = await supabase
+          .from('items')
+          .select('*')
+          .order('created_at', { ascending: false })
+        if (data) set({ items: data })
+      } catch {
+        set(state => ({ items: state.items.filter(i => i.id !== tempId) }))
+      }
+    })()
   },
 
   updateItem: async (id, fields) => {

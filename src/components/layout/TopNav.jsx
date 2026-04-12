@@ -37,7 +37,7 @@ export function TopNav() {
   const initial = displayName[0].toUpperCase()
 
   return (
-    <nav className="flex items-center justify-between px-6 py-4 shrink-0 w-full">
+    <nav className="flex items-center justify-between px-6 py-4 shrink-0 w-full border-b border-solid border-[rgba(223,78,203,1)]">
       {/* Wordmark */}
       <Link
         to={session ? '/dashboard' : '/'}
